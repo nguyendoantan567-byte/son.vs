@@ -2221,7 +2221,8 @@ __HH.KB = {
     InstaReset    = {kb = Enum.KeyCode.R,           gp = nil},
     AutoLeft      = {kb = Enum.KeyCode.Z,           gp = nil},
     AutoRight     = {kb = Enum.KeyCode.C,           gp = nil},
-    BatV2Toggle   = {kb = Enum.KeyCode.V,           gp = nil}
+    BatV2Toggle   = {kb = Enum.KeyCode.V,           gp = nil},
+    SpinBot       = {kb = Enum.KeyCode.B,           gp = nil}
 }
 
 __HH.isGamepadInput = function(inp)
@@ -4127,6 +4128,7 @@ function saveConfig()
         frameResetKey = ks(__HH.KB.InstaReset), frameResetKeyVersion = 1,
         autoLeftKey = ks(__HH.KB.AutoLeft), autoRightKey = ks(__HH.KB.AutoRight), tpFloorKey = ks(__HH.KB.TPFloor), guiHideKey = ks(__HH.KB.GuiHide),
         speedToggleKey = ks(__HH.KB.SpeedToggle), batV2Key = ks(__HH.KB.BatV2Toggle),
+        spinBotKey = ks(__HH.KB.SpinBot),
         antiRagdoll = __HH.antiRagdollEnabled,
         infiniteJump = __HH.infJumpEnabled, medusaCounter = __HH.medusaCounterEnabled,
         medusaReset = __HH.medusaResetEnabled, batCounter = __HH.batCounterEnabled,
@@ -4799,6 +4801,15 @@ __HH.UIS.InputBegan:Connect(function(input, gpe)
             and not _G.AceSafeModeTryStart(false) then return end
         if __HH.tpLockEnabled then toggleTPLock() end
         toggleBatV2(); saveConfig()
+    elseif __HH.kbMatch(__HH.KB.SpinBot, kc) then
+        local spin = _G.PureSpinBot
+        if spin and spin.setEnabled then
+            spin.setEnabled(not (spin.enabled == true))
+            if __HH.mobBtnRefs and __HH.mobBtnRefs.spin then
+                __HH.mobBtnRefs.spin(spin.enabled == true)
+            end
+            saveConfig()
+        end
     end
 end)
 
@@ -5197,6 +5208,7 @@ loadConfig = function(externalCfg)
     applyKey(__HH.KB.AutoLeft, cfg.autoLeftKey); applyKey(__HH.KB.AutoRight, cfg.autoRightKey); applyKey(__HH.KB.TPFloor, cfg.tpFloorKey)
     applyKey(__HH.KB.GuiHide, cfg.guiHideKey); applyKey(__HH.KB.SpeedToggle, cfg.speedToggleKey)
     applyKey(__HH.KB.BatV2Toggle, cfg.batV2Key)
+    applyKey(__HH.KB.SpinBot, cfg.spinBotKey)
     if cfg.selectedDevice == "PC" or cfg.selectedDevice == "MOBILE" or cfg.selectedDevice == "CONTROLLER" then
         __HH.selectedDevice = cfg.selectedDevice
     end
@@ -9734,6 +9746,7 @@ local function buildGui()
         __HH.KB.AutoLeft      = {kb = Enum.KeyCode.Z,           gp = nil}
         __HH.KB.AutoRight     = {kb = Enum.KeyCode.C,           gp = nil}
         __HH.KB.BatV2Toggle   = {kb = Enum.KeyCode.V,           gp = nil}
+        __HH.KB.SpinBot       = {kb = Enum.KeyCode.B,           gp = nil}
 
         -- Button visibility (mobile buttons) back to all-on.
         __HH.buttonVisibility = {
@@ -9927,6 +9940,16 @@ local function buildGui()
     mkActionRow(sfMechns, "Drop Brainrot", function() runDrop() end,     __HH.KB.DropBrainrot)
     mkActionRow(sfMechns, "TP Down",       function() __HH.tpToGround() end,  __HH.KB.TPFloor)
     mkActionRow(sfMechns, "Hide GUI",      function() if __HH.mainFrame then __HH.mainFrame.Visible = not __HH.mainFrame.Visible end end, __HH.KB.GuiHide)
+    mkActionRow(sfMechns, "Spin Bot",      function()
+        local spin = _G.PureSpinBot
+        if spin and spin.setEnabled then
+            spin.setEnabled(not (spin.enabled == true))
+            if __HH.mobBtnRefs and __HH.mobBtnRefs.spin then
+                __HH.mobBtnRefs.spin(spin.enabled == true)
+            end
+            saveConfig()
+        end
+    end, __HH.KB.SpinBot)
 
     mkSect(sfMechns, "Toggles")
     __HH.tpLockSetVisual = nil -- TP BAT menu toggle removed; engine retained.
